@@ -40,5 +40,10 @@ def add_time_features(df: pd.DataFrame, timestamp_col: str) -> pd.DataFrame:
     out = df.copy()
     ts = pd.to_datetime(out[timestamp_col], errors="coerce")
     out["hour"] = ts.dt.hour.fillna(0).astype(int)
-    out["day_name"] = ts.dt.day_name().fillna("Unknown")
+
+    # IMPORTANT: preserve existing day_name if loader already set it
+    if "day_name" not in out.columns:
+        out["day_name"] = ts.dt.day_name().fillna("Unknown")
+
     return out
+

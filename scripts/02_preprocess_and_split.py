@@ -1,5 +1,4 @@
 import os
-import numpy as np
 
 from src.utils.config import load_config, ensure_dirs
 from src.utils.io import load_json, save_pkl, save_json
@@ -30,13 +29,19 @@ def main():
 
     df = clip_outliers(df, cont_cols, q=cfg["preprocess"]["clip_quantile"])
 
-    # split (within Monday for now)
+    # split by days
     train_df, val_df, test_df = time_days_split(
         df,
         cfg["split"]["train_days"],
         cfg["split"]["val_days"],
         cfg["split"]["test_days"]
     )
+
+    # sanity checks to avoid silent empty splits
+    assert len(train_df) > 0, "Train split is empty. Check day_name values / split config."
+    assert len(val_df) > 0, "Val split is empty. Check day_name values / split config."
+    assert len(test_df) > 0, "Test split is empty. Check day_name values / split config."
+
 
     # Fit scaler on TRAIN ONLY
     scaler = fit_scaler(train_df, cont_cols, scaler_kind=cfg["preprocess"]["scaler"])

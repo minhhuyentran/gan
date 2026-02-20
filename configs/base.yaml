@@ -10,7 +10,7 @@ data:
   label_col: "Label"
   timestamp_col: "Timestamp"
   protocol_col: "Protocol"
-  dst_port_col: "Destination Port"
+  dst_port_col: "Dst Port"
   benign_label: "BENIGN"
 
 split:
