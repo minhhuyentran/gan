@@ -14,16 +14,18 @@ class CWGANGP(nn.Module):
     def disc(self, x, c):
         return self.D(torch.cat([x, c], dim=1))
 
-def gradient_penalty(model: CWGANGP, real_x, fake_x, c, device, gp_lambda=10.0):
+def gradient_penalty(model: CWGANGP, real_x, fake_x, c, gp_lambda=10.0):
+    device = real_x.device
     alpha = torch.rand(real_x.size(0), 1, device=device)
     alpha = alpha.expand_as(real_x)
-    interpolates = alpha * real_x + (1 - alpha) * fake_x
-    interpolates.requires_grad_(True)
 
-    d_inter = model.disc(interpolates, c)
+    inter = alpha * real_x + (1 - alpha) * fake_x
+    inter.requires_grad_(True)
+    d_inter = model.disc(inter, c)
+
     grads = torch.autograd.grad(
         outputs=d_inter,
-        inputs=interpolates,
+        inputs=inter,
         grad_outputs=torch.ones_like(d_inter),
         create_graph=True,
         retain_graph=True,

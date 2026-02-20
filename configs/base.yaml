@@ -1,5 +1,5 @@
 paths:
-  monday_csv: /mnt/data/monday.csv
+  raw_dir: data/raw
   out_dir: runs/exp01
   artifacts_dir: runs/exp01/artifacts
 
@@ -10,21 +10,20 @@ data:
   label_col: "Label"
   timestamp_col: "Timestamp"
   protocol_col: "Protocol"
-  # Bạn sẽ auto-detect numeric/cat sau khi đọc file, hoặc hard-code schema.json
+  dst_port_col: "Destination Port"
+  benign_label: "BENIGN"
 
 split:
-  method: "time"   # "time" | "group"
+  mode: "time_days"            # <-- dùng chuẩn theo ngày
   train_days: ["Monday"]
   val_days: ["Tuesday"]
   test_days: ["Wednesday", "Thursday", "Friday"]
 
 preprocess:
-  scaler: "standard"  # "standard" | "minmax"
+  scaler: "standard"
   clip_quantile: 0.999
-  handle_inf: "nan_to_num"
 
 gan:
-  model: "cwgan_gp"
   z_dim: 128
   hidden: [256, 256]
   batch_size: 1024
@@ -36,4 +35,8 @@ gan:
     use_protocol: true
     use_service_bucket: true
     use_time_window: true
-    time_window: "hour"   # hour bin
+    time_window: "hour"
+
+generate:
+  n_samples: 200000
+  target_https_ratio: 0.6

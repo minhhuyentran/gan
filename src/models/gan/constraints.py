@@ -6,23 +6,31 @@ def enforce_nonneg(df: pd.DataFrame, cols: list[str]) -> pd.DataFrame:
     out[cols] = out[cols].clip(lower=0.0)
     return out
 
-def enforce_monotonic(df: pd.DataFrame, triplets: list[tuple[str,str,str]]) -> pd.DataFrame:
-    # (min_col, mean_col, max_col)
-    out = df.copy()
-    for mn, mean, mx in triplets:
-        a = out[mn].values
-        b = out[mean].values
-        c = out[mx].values
-        # sort each row’s trio
-        stacked = np.vstack([a,b,c]).T
-        stacked.sort(axis=1)
-        out[mn] = stacked[:,0]
-        out[mean] = stacked[:,1]
-        out[mx] = stacked[:,2]
-    return out
-
 def round_counts(df: pd.DataFrame, count_cols: list[str]) -> pd.DataFrame:
     out = df.copy()
-    out[count_cols] = np.rint(out[count_cols]).astype(int)
-    out[count_cols] = out[count_cols].clip(lower=0)
+    for c in count_cols:
+        out[c] = np.rint(out[c]).astype(int)
+        out[c] = out[c].clip(lower=0)
     return out
+
+def enforce_min_mean_max(df: pd.DataFrame, groups: list[tuple[str, str, str]]) -> pd.DataFrame:
+    """
+    groups: list of (min_col, mean_col, max_col)
+    """
+    out = df.copy()
+    for mn, mean, mx in groups:
+        a = out[mn].to_numpy()
+        b = out[mean].to_numpy()
+        c = out[mx].to_numpy()
+        stacked = np.vstack([a, b, c]).T
+        stacked.sort(axis=1)
+        out[mn] = stacked[:, 0]
+        out[mean] = stacked[:, 1]
+        out[mx] = stacked[:, 2]
+    return out
+
+def violation_rate_nonneg(df: pd.DataFrame, cols: list[str]) -> float:
+    if len(cols) == 0:
+        return 0.0
+    v = (df[cols] < 0).any(axis=1).mean()
+    return float(v)
