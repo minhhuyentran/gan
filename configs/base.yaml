@@ -1,0 +1,39 @@
+paths:
+  monday_csv: /mnt/data/monday.csv
+  out_dir: runs/exp01
+  artifacts_dir: runs/exp01/artifacts
+
+seed: 42
+
+data:
+  drop_cols: ["Flow ID", "Src IP", "Dst IP"]
+  label_col: "Label"
+  timestamp_col: "Timestamp"
+  protocol_col: "Protocol"
+  # Bạn sẽ auto-detect numeric/cat sau khi đọc file, hoặc hard-code schema.json
+
+split:
+  method: "time"   # "time" | "group"
+  train_days: ["Monday"]
+  val_days: ["Tuesday"]
+  test_days: ["Wednesday", "Thursday", "Friday"]
+
+preprocess:
+  scaler: "standard"  # "standard" | "minmax"
+  clip_quantile: 0.999
+  handle_inf: "nan_to_num"
+
+gan:
+  model: "cwgan_gp"
+  z_dim: 128
+  hidden: [256, 256]
+  batch_size: 1024
+  lr: 0.0001
+  n_critic: 5
+  gp_lambda: 10.0
+  epochs: 100
+  cond:
+    use_protocol: true
+    use_service_bucket: true
+    use_time_window: true
+    time_window: "hour"   # hour bin
